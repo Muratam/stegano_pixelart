@@ -1,6 +1,6 @@
 # import imageman
 import stb_image/[read, write]
-import tables,sets,sequtils
+import tables,sets
 import math
 import os
 import pnm

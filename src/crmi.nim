@@ -1,6 +1,6 @@
 # crmiLTP のみ管理. 色を区別するが,近さとかは管轄外
-import strutils,sequtils,hashes,strformat,tables,algorithm,sets,random,math,os
-import ../lib/[image,stc]
+import hashes,tables,algorithm,math,sequtils
+import image
 
 const W* = {
   1:1.5691,  57:1.1864,  31:1.1385,   2:0.7880,

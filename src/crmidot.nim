@@ -1,7 +1,5 @@
-import strutils,sequtils,hashes,strformat,tables,algorithm,sets,random,math,os
-import ../lib/[image,stc]
-import ./crmi
-import ./util
+import sequtils,hashes,strformat,tables,algorithm,sets,random,math,os
+import crmi,util,image,stc
 template `max=`*(x,y) = x = max(x,y)
 template `min=`*(x,y) = x = min(x,y)
 const INF = 1e12

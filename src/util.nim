@@ -1,5 +1,5 @@
 import strutils,sequtils,hashes,tables,algorithm,sets,math,os,heapqueue,deques
-import ../lib/[image]
+import image
 import times
 template stopwatch*(body) = (let t1 = cpuTime();body;stderr.writeLine "TIME:",(cpuTime() - t1) * 1000,"ms")
 
