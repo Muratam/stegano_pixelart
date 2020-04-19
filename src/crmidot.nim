@@ -250,8 +250,8 @@ if isMainModule:
   echo image.getColorPalette()
   let M = newSeqWith(int(0.01*float(image.w*image.h)),rand(0..1))
   let (stego,_,_) = image.crmiDotEmbed(M,saveDir)
-  image.savePNGx10("239i.png")
-  stego.savePNGx10("239w.png")
+  # image.savePNGx10("239i.png")
+  # stego.savePNGx10("239w.png")
   # - 231 / 123
   # input.embedToMarker(M)
   # stego.vividGradation(1.0).trimOuter().toMarker(2).savePNGx10(fmt"{saveDir}/embedMarker.png")
