@@ -3,3 +3,5 @@
 [修士課程で研究していたものです](https://www.ieice.org/ken/paper/20200305e1wB/).
 
 二値画像のようにドット絵の同一色の領域の境界に情報をSTCで埋め込むため,自然な画像を生成できる特徴があります.
+
+private repo: https://github.com/Muratam/steganoexpr
