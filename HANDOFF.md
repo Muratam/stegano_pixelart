@@ -20,7 +20,7 @@ URL のパスは `/stegano/`（`web/vite.config.ts` の `base`・`docker/nginx.c
   - 配信は nginx のコンテナ（`Dockerfile`・`docker/nginx.conf`。uid 10001、読み取り専用、JS・CSS・HTML はビルド時に gzip、`/stegano/assets/` は immutable）。サーバー側の処理・DB・シークレットは無い
 - **メッセージの形式**（Web 版）: `[本文のバイト数 16 ビット][UTF-8 の本文][CRC-16/CCITT-FALSE 16 ビット][0 の詰め物]`。詰め物は STC の列の数 w = n div m を `maxColumns(h)`（√2^(h+3)）以下にするため（w が大きいと小行列 Ĥ の列が全部異なる組が作れない）。取り出しは w = 2, 3, … と順に試し、CRC と UTF-8 が合うものを返す
 - **鍵**: 数字だけ（1〜2^53）はそのまま乱数のシード（元のプログラムは 1234 固定）。それ以外は FNV-1a 64 の下位 62 ビット。並べ替えとマスクにだけ使い、暗号化ではない
-- **画面**: sagisawa のポータルと同じトークンのダークテーマ（`web/src/style.css`）。幅 860px 以上で 2 列、それ未満は 1 列。スマホ縦（390×844）・PC（1280×720）・ポータルの iframe（左に 208px のナビ、上に 36px の帯）の中で横にはみ出さないこと
+- **画面**: sagisawa のポータルと同じトークンのダークテーマ（`web/src/style.css`）。幅 860px 以上で 2 列、それ未満は 1 列。画像は `components/PixelCanvas.vue`（ビューア: 既定は枠に収まる最大の整数倍、−・＋・枠に合わせる・等倍、ホイール・ピンチ・ダブルクリック・キー〔+ − 0 1 矢印〕、拡大時のドラッグ、×12 以上で格子線、カーソル／タップの下の座標と色。比較の表示を切り替えても拡大と位置を保ち、別の画像を読むと枠に合わせ直す）。favicon は sagisawa と同じ（`web/public/icon.svg`・`apple-icon.png`）。スマホ縦（390×844）・PC（1280×720）・ポータルの iframe（左に 208px のナビ、上に 36px の帯）の中で横にはみ出さないこと
 
 ## 3. テスト
 - `cd web && npm run lint`・`npm test`（vitest、数秒）・`npm run build`（`vue-tsc --noEmit` と `vite build`）
