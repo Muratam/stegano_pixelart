@@ -1,10 +1,11 @@
 <script setup lang="ts">
-// ドット絵を整数倍に拡大して描く（ぼかさない）。
+// ドット絵を整数倍に拡大して描く（ぼかさない）。highlights の画素はアクセントの色の枠で囲む。
 import { onMounted, ref, watch } from "vue";
 import { toRgba, type PixelImage } from "../core/pixel";
 
 const props = defineProps<{
   image: PixelImage;
+  highlights?: { x: number; y: number }[];
   label: string;
 }>();
 
@@ -29,10 +30,19 @@ function draw() {
   sctx.putImageData(new ImageData(toRgba(img), img.width, img.height), 0, 0);
   ctx.clearRect(0, 0, el.width, el.height);
   ctx.drawImage(src, 0, 0, el.width, el.height);
+  if (props.highlights?.length) {
+    const css = getComputedStyle(document.documentElement);
+    const lw = Math.max(1, Math.round(scale / 6));
+    ctx.lineWidth = lw;
+    ctx.strokeStyle = css.getPropertyValue("--accent").trim() || "#47c8e6";
+    for (const { x, y } of props.highlights) {
+      ctx.strokeRect(x * scale - lw / 2, y * scale - lw / 2, scale + lw, scale + lw);
+    }
+  }
 }
 
 onMounted(draw);
-watch(() => props.image, draw);
+watch(() => [props.image, props.highlights], draw);
 </script>
 
 <template>
