@@ -1,0 +1,10 @@
+.git
+.claude
+.env
+web/node_modules
+web/dist
+web/test
+tools
+src
+samples
+output
