@@ -7,7 +7,7 @@ import PixelCanvas from "./PixelCanvas.vue";
 import { embed, getCapacity } from "../stegoClient";
 import { embedSamples } from "../samples";
 import { hexOf, type Rgb } from "../core/color";
-import { createImage, type PixelImage } from "../core/pixel";
+import type { PixelImage } from "../core/pixel";
 import type { Capacity, EmbedTextResult } from "../core/api";
 import { DEFAULT_KEY } from "../core/message";
 
@@ -22,10 +22,10 @@ const wet = ref<Set<Rgb>>(new Set());
 const busy = ref(false);
 const error = ref("");
 const result = shallowRef<(EmbedTextResult & { png: Uint8Array }) | null>(null);
-type View = "stego" | "diff" | "cover" | "cost";
-const view = ref<View>("diff");
+// 埋め込んだ後は結果の画像をそのまま出す（変えた画素の強調はしない）
+type View = "stego" | "cover" | "cost";
+const view = ref<View>("stego");
 const views: { id: View; label: string }[] = [
-  { id: "diff", label: "変えた画素" },
   { id: "stego", label: "結果" },
   { id: "cover", label: "元の画像" },
   { id: "cost", label: "変えやすさ" },
@@ -35,12 +35,8 @@ const MAX_PALETTE_CHIPS = 64;
 const bytes = computed(() => new TextEncoder().encode(text.value).length);
 const tooLong = computed(() => cap.value !== null && bytes.value > cap.value.bytes);
 
-// 別の画像を読んだらビューアを枠に合わせ直す（比較の表示の切り替えでは拡大と位置を保つ）
-const loadCount = ref(0);
-
 function onLoaded(l: LoadedImage) {
   loaded.value = l;
-  loadCount.value++;
   result.value = null;
   error.value = "";
   wet.value = new Set((l.sample?.wetColors ?? []).filter((c) => l.palette.includes(c)));
@@ -70,7 +66,7 @@ async function run() {
   busy.value = true;
   try {
     result.value = await embed(loaded.value.image, text.value, { key: key.value, h: h.value, wetColors: [...wet.value] });
-    view.value = "diff";
+    view.value = "stego";
   } catch (e) {
     result.value = null;
     error.value = e instanceof Error ? e.message : String(e);
@@ -79,31 +75,14 @@ async function run() {
   }
 }
 
-// 元のプログラムの embedmap と同じ見せ方: 元の画像を明るい灰色にし、変えた画素だけ新しい色で描く
-const diffImage = computed<PixelImage | null>(() => {
-  const r = result.value;
-  const src = loaded.value?.image;
-  if (!r || !src) return null;
-  const out = createImage(src.width, src.height);
-  for (let i = 0; i < src.data.length; i++) {
-    const c = src.data[i];
-    const g = 192 + Math.floor((((c >> 16) & 0xff) + ((c >> 8) & 0xff) + (c & 0xff)) / 12);
-    out.data[i] = (g << 16) | (g << 8) | g;
-  }
-  for (const ch of r.changed) out.data[ch.x + ch.y * src.width] = ch.to;
-  return out;
-});
-
 const shown = computed<PixelImage | null>(() => {
   if (!loaded.value) return null;
   const r = result.value;
   if (!r) return loaded.value.image;
-  if (view.value === "stego") return r.stego;
   if (view.value === "cover") return loaded.value.image;
   if (view.value === "cost") return r.distortion;
-  return diffImage.value;
+  return r.stego;
 });
-const highlights = computed(() => (result.value && (view.value === "diff" || view.value === "stego") ? result.value.changed : []));
 
 const downloadName = computed(() => (loaded.value?.name ?? "image").replace(/\.[^.]+$/, "") + "_stego.png");
 function download() {
@@ -142,8 +121,6 @@ const fmt = (x: number, d = 2) => (Number.isFinite(x) ? x.toFixed(d) : "∞");
         <PixelCanvas
           class="preview"
           :image="shown"
-          :highlights="highlights"
-          :reset-key="loadCount"
           :label="result ? views.find((v) => v.id === view)?.label ?? '' : '読み込んだ画像'"
         />
         <div
@@ -168,12 +145,6 @@ const fmt = (x: number, d = 2) => (Number.isFinite(x) ? x.toFixed(d) : "∞");
           class="quiet note"
         >
           暗いほど変えても目立ちにくい画素（元のプログラムの distortion.png と同じ図）。白は変えられない画素と、変えない色に関わる画素。
-        </p>
-        <p
-          v-if="result && view === 'diff'"
-          class="quiet note"
-        >
-          変えた画素だけを新しい色で描き、枠で囲んでいます。
         </p>
       </template>
     </section>
