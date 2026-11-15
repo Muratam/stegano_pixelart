@@ -6,7 +6,7 @@
 
 | 項目 | 場所 |
 |---|---|
-| 公開 | https://sagisawa.0am.jp/stegano/ （public: ログインなし。予定） |
+| 公開 | https://sagisawa.0am.jp/stegano/ （public: ログインなし） |
 | リポジトリ | GitHub `Muratam/stegano_pixelart`（public、既定のブランチ master）。管理者AI のワーキングコピーは `/home/claude/stegano_pixelart` |
 | push | 管理者AI はこのリポジトリ専用のデプロイキー（ssh の Host `github-stegano`）。ラボの `apps` は https の公開 URL で pull だけ |
 | 動く場所 | ラボの `apps` の `/srv/stegano_pixelart/`、compose のプロジェクト `stegano_pixelart`、`10.44.135.10:3170` |
@@ -43,9 +43,5 @@ master にマージしてから（PR）、ラボで `scripts/deploy-lab.sh`。`/
 - 管理者AI: `incus exec apps -- /srv/stegano_pixelart/scripts/deploy-lab.sh`
 - 公開: `sagisawa-expose add stegano 10.44.135.10:3170 --kind public`
 
-## 5. 残作業（初回の配置）
-1. この変更を master にマージする（PR）
-2. ラボで clone: `incus exec apps -- git clone https://github.com/Muratam/stegano_pixelart.git /srv/stegano_pixelart`
-3. 初回のデプロイ: `incus exec apps -- /srv/stegano_pixelart/scripts/deploy-lab.sh` → `incus exec apps -- /srv/stegano_pixelart/scripts/smoke.sh http://10.44.135.10:3170`（Docker のイメージのビルドはここで初めて確認する）
-4. 公開: `sudo -n /usr/local/sbin/sagisawa-expose add stegano 10.44.135.10:3170 --kind public` → `scripts/smoke.sh https://sagisawa.0am.jp`
-5. `Muratam/sagisawa-admin` の `inventory.md` に追記する。ポータル・ホームのアプリの一覧に載せるかは murata に聞く
+## 5. 残作業
+- なし（初回の配置・公開・`inventory.md` とアプリの一覧への追加は 11-15 に完了した。T382）。
