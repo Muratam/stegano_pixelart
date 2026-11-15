@@ -143,8 +143,14 @@ export interface SearchParams {
    * false にすると元とビット単位で同じ結果になる（golden の照合用）。
    */
   fixPush: boolean;
+  /**
+   * 最後の命令（終了）まで来た候補を、余剰のスタックが残っているものからも選ぶ（既定 true）。
+   * 元は余剰が空のものだけから選ぶので、終了まで来ていても「見つからない」で止まることがあった。終了した後のスタックは出力に影響しない。
+   * false にすると元と同じ（golden の照合用）。
+   */
+  anyFundAtEnd: boolean;
 }
-export const DEFAULT_PARAMS: SearchParams = { maxFrontierNum: 720, maxFundLevel: 6, maxTrackBackOrderLen: 30, fixPush: true };
+export const DEFAULT_PARAMS: SearchParams = { maxFrontierNum: 720, maxFundLevel: 6, maxTrackBackOrderLen: 30, fixPush: true, anyFundAtEnd: true };
 
 export interface SearchProgress {
   iteration: number;
@@ -298,8 +304,11 @@ class Env {
       if (front.length > 0) this.completedMin = Math.min(...front.map((f) => f.val));
       return;
     }
+    const isTerminate = this.orders[ord].order === Order.Terminate;
     for (const f of front) {
       const t = new Target(this, f, ord);
+      // Web 版で足した試し: 終了の命令では、ブロックを伸ばさずに今のブロックのまま周りを黒で囲むことも試す
+      if (isTerminate && this.p.anyFundAtEnd && f.mat[f.x + f.y * this.w]!.color < CHROM_MAX) t.terminateHere();
       t.extendBlock();
       t.doOrder();
       t.pushBlack();
@@ -309,7 +318,9 @@ class Env {
   }
 
   getResult(): { colors: Int8Array; val: number } {
-    const front = this.fronts[this.fronts.length - 1][0];
+    const last = this.fronts[this.fronts.length - 1];
+    let front = last[0];
+    if ((!front || front.length === 0) && this.p.anyFundAtEnd) front = last.find((f) => f.length > 0) ?? [];
     if (!front || front.length === 0) throw new Error("命令を最後まで実行する画像が見つかりませんでした");
     let minIndex = 0;
     let minVal = EPS;
@@ -515,6 +526,10 @@ class Target {
     if (onlySameColor && nb.color !== color) return false;
     if (onlyNotUsedCCDP && nb.used[dir8(r.cc, r.dp)]) return false;
     return true;
+  }
+
+  terminateHere() {
+    this.checkTerminate(this.node);
   }
 
   private checkTerminate(node: Node) {

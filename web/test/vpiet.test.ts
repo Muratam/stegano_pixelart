@@ -56,12 +56,12 @@ describe.each(golden.cases)("$name（$text）", (c) => {
     if (c.name !== "apple_piet") expect(formatPasm(stringToPasm(c.text)).split("\n")).toEqual(c.orders);
   });
   it("元と同じ扱いで探索の結果がビット単位で一致", () => {
-    const r = quasiStegano2D(base, img.width, img.height, parsePasm(c.orders.join("\n")), { ...params, fixPush: false });
+    const r = quasiStegano2D(base, img.width, img.height, parsePasm(c.orders.join("\n")), { ...params, fixPush: false, anyFundAtEnd: false });
     expect(Array.from(r.colors)).toEqual(c.result.flat());
     expect(r.cost).toBe(c.cost);
   });
   it("直した扱いで、実行すると文字列が出て終わる", () => {
-    const r = quasiStegano2D(base, img.width, img.height, parsePasm(c.orders.join("\n")), { ...params, fixPush: true });
+    const r = quasiStegano2D(base, img.width, img.height, parsePasm(c.orders.join("\n")), { ...params, fixPush: true, anyFundAtEnd: true });
     const m = run(img.width, img.height, r.colors);
     expect(m.output).toBe(c.text);
     expect(m.finished).toBe(true);
@@ -73,7 +73,28 @@ describe.each(golden.cases)("$name（$text）", (c) => {
 describe("元でも見つからない組み合わせ", () => {
   it.each(golden.failures)("$name（$text）は見つからないと返す", (f) => {
     const { img, base } = toBase(f.input);
-    const params = { ...DEFAULT_PARAMS, maxFrontierNum: f.params[0], maxFundLevel: f.params[1], maxTrackBackOrderLen: f.params[2], fixPush: false };
+    const params = { ...DEFAULT_PARAMS, maxFrontierNum: f.params[0], maxFundLevel: f.params[1], maxTrackBackOrderLen: f.params[2], fixPush: false, anyFundAtEnd: false };
     expect(() => quasiStegano2D(base, img.width, img.height, parsePasm(f.orders.join("\n")), params)).toThrow(/見つかりません/);
+  });
+});
+
+describe("サンプルの画像", () => {
+  it("public/samples/vpiet/heart_piet.png を実行すると Piet と出る", async () => {
+    const { imageToProgram } = await import("../src/vpiet/api");
+    const img = decodeImage(new Uint8Array(readFileSync(join(__dirname, "../public/samples/vpiet/heart_piet.png"))));
+    const p = imageToProgram(img);
+    expect(p.codel).toBe(1);
+    expect(p.unknown).toBe(0);
+    const m = run(p.program.width, p.program.height, p.program.colors);
+    expect(m.output).toBe("Piet");
+  });
+  it("10 倍に拡大してもコーデルの大きさを推定して同じ出力", async () => {
+    const { imageToProgram, pietToImage } = await import("../src/vpiet/api");
+    const img = decodeImage(new Uint8Array(readFileSync(join(__dirname, "../public/samples/vpiet/heart_piet.png"))));
+    const p1 = imageToProgram(img);
+    const big = pietToImage(p1.program.colors, p1.program.width, p1.program.height, 10);
+    const p = imageToProgram(big);
+    expect(p.codel).toBe(10);
+    expect(run(p.program.width, p.program.height, p.program.colors).output).toBe("Piet");
   });
 });
