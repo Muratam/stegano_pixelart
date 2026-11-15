@@ -11,7 +11,7 @@
 import { NimRand } from "./rand";
 import { crmiLTP, DP4, KEY_OF_W, W_ORDERED } from "./crmi";
 import { makeColorDistance, type Rgb } from "./color";
-import { cloneImage, createImage, type PixelImage } from "./image";
+import { cloneImage, createImage, type PixelImage } from "./pixel";
 import { stcEmbed } from "./stc";
 
 export interface Candidate {
@@ -266,6 +266,7 @@ export function countSlots(img: PixelImage): number {
 /**
  * 変えやすさの図（元の distortionMap）: 外側 2px は白、ほかは「自分と違う色に変える最小のコスト」を 0〜255 に線形に並べた灰色。
  * 暗いほど変えやすい。変えられない画素は 255。
+ * 元と違う点: 「変えない色」のコスト（+100000）は範囲の計算から外して白にする（入れると他が全部黒になって見分けられないため）。
  */
 export function distortionImage(img: PixelImage, dist: DistortionResult): PixelImage {
   const { width: rw, height: rh, candidates } = dist;
@@ -276,7 +277,7 @@ export function distortionImage(img: PixelImage, dist: DistortionResult): PixelI
   let maxR = 0;
   for (let i = 0; i < rw * rh; i++) {
     const self = img.data[(i % rw) + 2 + (Math.floor(i / rw) + 2) * img.width];
-    const ds = candidates[i].filter((c) => c.color !== self).map((c) => c.distortion);
+    const ds = candidates[i].filter((c) => c.color !== self && c.distortion < WET_PENALTY).map((c) => c.distortion);
     if (ds.length === 0) continue;
     const m = Math.min(...ds);
     mins[i] = m;

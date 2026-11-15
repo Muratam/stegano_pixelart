@@ -2,7 +2,7 @@
  * crmiLTP（中心と 8 近傍が「同じ色か」の 2 値のパターンを、回転・反転で同一視した番号）と、その重み。
  * 元の src/crmi.nim を移したもの。
  */
-import type { PixelImage } from "./image";
+import type { PixelImage } from "./pixel";
 import type { Rgb } from "./color";
 
 /** パターンごとの重み（元の W） */
