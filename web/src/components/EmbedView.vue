@@ -35,8 +35,12 @@ const MAX_PALETTE_CHIPS = 64;
 const bytes = computed(() => new TextEncoder().encode(text.value).length);
 const tooLong = computed(() => cap.value !== null && bytes.value > cap.value.bytes);
 
+// 別の画像を読んだらビューアを枠に合わせ直す（比較の表示の切り替えでは拡大と位置を保つ）
+const loadCount = ref(0);
+
 function onLoaded(l: LoadedImage) {
   loaded.value = l;
+  loadCount.value++;
   result.value = null;
   error.value = "";
   wet.value = new Set((l.sample?.wetColors ?? []).filter((c) => l.palette.includes(c)));
@@ -139,6 +143,7 @@ const fmt = (x: number, d = 2) => (Number.isFinite(x) ? x.toFixed(d) : "∞");
           class="preview"
           :image="shown"
           :highlights="highlights"
+          :reset-key="loadCount"
           :label="result ? views.find((v) => v.id === view)?.label ?? '' : '読み込んだ画像'"
         />
         <div
