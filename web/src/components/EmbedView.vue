@@ -41,7 +41,7 @@ function onLoaded(l: LoadedImage) {
   result.value = null;
   error.value = "";
   wet.value = new Set((l.sample?.wetColors ?? []).filter((c) => l.palette.includes(c)));
-  if (l.sample && !text.value) text.value = "Hello!";
+  if (l.sample && !text.value) text.value = "Hey";
 }
 
 watch([loaded, h], async () => {
