@@ -20,7 +20,7 @@ URL のパスは `/stegano/`（`web/vite.config.ts` の `base`・`docker/nginx.c
   - 配信は nginx のコンテナ（`Dockerfile`・`docker/nginx.conf`。uid 10001、読み取り専用、JS・CSS・HTML はビルド時に gzip、`/stegano/assets/` は immutable）。サーバー側の処理・DB・シークレットは無い
 - **メッセージの形式**（Web 版）: `[本文のバイト数 16 ビット][UTF-8 の本文][CRC-16/CCITT-FALSE 16 ビット][0 の詰め物]`。詰め物は STC の列の数 w = n div m を `maxColumns(h)`（√2^(h+3)）以下にするため（w が大きいと小行列 Ĥ の列が全部異なる組が作れない）。取り出しは w = 2, 3, … と順に試し、CRC と UTF-8 が合うものを返す
 - **鍵**: 数字だけ（1〜2^53）はそのまま乱数のシード（元のプログラムは 1234 固定）。それ以外は FNV-1a 64 の下位 62 ビット。並べ替えとマスクにだけ使い、暗号化ではない
-- **画面**: sagisawa のポータルと同じトークンのダークテーマ（`web/src/style.css`）。幅 860px 以上で 2 列、それ未満は 1 列。埋め込んだ後の画像は結果をそのまま出す（変えた画素の強調はしない。切り替えは結果・元の画像・変えやすさ）。favicon は sagisawa と同じ（`web/public/icon.svg`・`apple-icon.png`）。スマホ縦（390×844）・PC（1280×720）・ポータルの iframe（左に 208px のナビ、上に 36px の帯）の中で横にはみ出さないこと
+- **画面**: sagisawa のポータルと同じトークンのダークテーマ（`web/src/style.css`）。幅 860px 以上で 2 列、それ未満は 1 列。埋め込んだ後の画像は既定で結果をそのまま出す（強調なし）。切り替えは結果・変えた画素（比較用: 元を灰色にして変えた画素だけ新しい色で描き、枠で囲む）・元の画像・変えやすさ。favicon は sagisawa と同じ（`web/public/icon.svg`・`apple-icon.png`）。スマホ縦（390×844）・PC（1280×720）・ポータルの iframe（左に 208px のナビ、上に 36px の帯）の中で横にはみ出さないこと
 
 ## 3. テスト
 - `cd web && npm run lint`・`npm test`（vitest、数秒）・`npm run build`（`vue-tsc --noEmit` と `vite build`）
