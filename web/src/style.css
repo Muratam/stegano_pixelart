@@ -35,6 +35,10 @@
 * {
   box-sizing: border-box;
 }
+/* タブを切り替えて縦のスクロールバーが出入りしても、帯と本文の位置をずらさない */
+html {
+  scrollbar-gutter: stable;
+}
 html,
 body {
   margin: 0;

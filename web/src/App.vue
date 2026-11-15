@@ -12,9 +12,9 @@ import type { PixelImage } from "./core/pixel";
 // モード（ドット絵ステガノ・VPiet）とページ（埋め込む・取り出す・説明）。URL の #/<モード>/<ページ> と対応させる
 type Mode = "stegano" | "vpiet";
 type Page = "embed" | "extract" | "about";
-const modes: { id: Mode; label: string }[] = [
-  { id: "stegano", label: "ドット絵ステガノ" },
-  { id: "vpiet", label: "VPiet" },
+const modes: { id: Mode; label: string; short: string }[] = [
+  { id: "stegano", label: "ドット絵ステガノ", short: "ステガノ" },
+  { id: "vpiet", label: "VPiet", short: "VPiet" },
 ];
 const tabs: { id: Page; label: string; slug: Record<Mode, string> }[] = [
   { id: "embed", label: "埋め込む", slug: { stegano: "embed", vpiet: "embed" } },
@@ -66,8 +66,54 @@ function onVpietRun(image: PixelImage, name: string) {
 <template>
   <header class="bar">
     <div class="bar-inner">
-      <nav
+      <!-- 1 段: タイトル → モードの切り替え（セグメント）→ ページのタブ（下線。akochan・tetris と同じ形）→ 右端に GitHub -->
+      <button
+        type="button"
+        class="brand"
+        @click="go(mode, 'embed')"
+      >
+        <span
+          class="mark"
+          aria-hidden="true"
+        >
+          <svg
+            viewBox="0 0 16 16"
+            width="16"
+            height="16"
+          >
+            <rect
+              x="2"
+              y="2"
+              width="5"
+              height="5"
+            />
+            <rect
+              x="9"
+              y="9"
+              width="5"
+              height="5"
+            />
+            <rect
+              x="9"
+              y="2"
+              width="5"
+              height="5"
+              opacity="0.45"
+            />
+            <rect
+              x="2"
+              y="9"
+              width="5"
+              height="5"
+              opacity="0.45"
+            />
+          </svg>
+        </span>
+        <span class="name">ドット絵ステガノ</span>
+      </button>
+      <div
         class="modes"
+        role="group"
         aria-label="モード"
       >
         <button
@@ -75,10 +121,26 @@ function onVpietRun(image: PixelImage, name: string) {
           :key="m.id"
           type="button"
           class="mode"
-          :aria-current="mode === m.id ? 'page' : undefined"
+          :aria-pressed="mode === m.id"
+          :title="m.label"
           @click="go(m.id, mode === m.id ? page : 'embed')"
         >
-          {{ m.label }}
+          {{ m.short }}
+        </button>
+      </div>
+      <nav
+        class="tabs"
+        aria-label="ページ"
+      >
+        <button
+          v-for="t in tabs"
+          :key="t.id"
+          type="button"
+          class="tab"
+          :aria-current="page === t.id ? 'page' : undefined"
+          @click="go(mode, t.id)"
+        >
+          {{ t.label }}
         </button>
       </nav>
       <a
@@ -89,25 +151,6 @@ function onVpietRun(image: PixelImage, name: string) {
       >
         <AppIcon name="github" />
       </a>
-    </div>
-    <div class="bar-sub">
-      <div class="bar-inner sub">
-        <nav
-          class="tabs subtabs"
-          aria-label="ページ"
-        >
-          <button
-            v-for="t in tabs"
-            :key="t.id"
-            type="button"
-            class="tab"
-            :aria-current="page === t.id ? 'page' : undefined"
-            @click="go(mode, t.id)"
-          >
-            {{ t.label }}
-          </button>
-        </nav>
-      </div>
     </div>
   </header>
 
@@ -141,6 +184,10 @@ function onVpietRun(image: PixelImage, name: string) {
 </template>
 
 <style scoped>
+/*
+ * 上の帯（1 段）。タブの見た目は Muratam/akochandaaaaaa の .ako-head・.ako-tab と同じ値（Muratam/tetris-esolang の T402 と同じ揃え方）。
+ * モードの切り替えはページのタブと階層が違うので、下線のタブではなく枠の中の小さな切り替え（セグメント）にする。
+ */
 .bar {
   position: sticky;
   top: 0;
@@ -151,18 +198,74 @@ function onVpietRun(image: PixelImage, name: string) {
 .bar-inner {
   display: flex;
   align-items: center;
-  gap: 4px 12px;
+  gap: 8px;
   max-width: 1120px;
-  min-height: var(--bar-h);
+  min-height: 48px;
   margin: 0 auto;
-  /* 左はタブの余白（16px）で本文の左端とそろえる */
-  padding: 0 16px 0 0;
+  padding: 0 8px 0 16px;
 }
-/*
- * タブ（Muratam/akochandaaaaaa の .ako-tab と同じ見た目）: 枠の無い文字だけのタブで、選んだタブは文字を明るく太くし、下にアクセントの線を引く。
- * 上の段がモード（ドット絵ステガノ・VPiet。GitHub へのリンクは右端）、下の段がページ（埋め込む・取り出す・説明）。どちらも左揃え。
- */
-.modes,
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+.mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+}
+.mark svg {
+  fill: currentColor;
+}
+.name {
+  font-size: 1rem;
+  font-weight: 650;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+/* モード: 枠で囲んだ 2 つのボタン。選んだ方を塗る */
+.modes {
+  display: inline-flex;
+  flex: none;
+  padding: 2px;
+  background: var(--bg-side);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+}
+.mode {
+  min-height: 28px;
+  padding: 0 10px;
+  background: none;
+  border: 0;
+  border-radius: 3px;
+  color: var(--ink-soft);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.mode:hover {
+  color: var(--ink);
+}
+.mode[aria-pressed="true"] {
+  background: var(--surface-3);
+  color: var(--ink);
+}
+/* ページ: akochan と同じ下線のタブ */
 .tabs {
   display: flex;
   flex: 1;
@@ -172,10 +275,10 @@ function onVpietRun(image: PixelImage, name: string) {
   overflow-x: auto;
   scrollbar-width: none;
 }
-.mode,
 .tab {
-  flex: none;
-  padding: 0 16px;
+  flex: 1;
+  min-height: 48px;
+  padding: 0 4px;
   background: none;
   border: 0;
   border-bottom: 2px solid transparent;
@@ -186,29 +289,13 @@ function onVpietRun(image: PixelImage, name: string) {
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-.mode:hover,
 .tab:hover {
   color: var(--ink);
 }
-.mode[aria-current="page"],
 .tab[aria-current="page"] {
   color: var(--ink);
   font-weight: 600;
   border-bottom-color: var(--accent);
-}
-.bar-sub {
-  border-top: 1px solid var(--line);
-}
-/* 高さは akochan と同じ（スマホ 48px・幅 700px 以上 56px。Muratam/tetris-esolang の T402 と同じ値） */
-.bar-inner,
-.bar-inner.sub {
-  min-height: 48px;
-}
-@media (min-width: 700px) {
-  .bar-inner,
-  .bar-inner.sub {
-    min-height: 56px;
-  }
 }
 .gh {
   display: inline-flex;
@@ -217,6 +304,7 @@ function onVpietRun(image: PixelImage, name: string) {
   width: 34px;
   height: 34px;
   flex: none;
+  margin-left: auto;
   color: var(--ink-soft);
   border-radius: var(--radius-sm);
 }
@@ -228,6 +316,48 @@ function onVpietRun(image: PixelImage, name: string) {
   width: 18px;
   height: 18px;
 }
+/* スマホ: タイトルの文字は隠して印だけ（読み上げには残す。akochan と同じ） */
+@media (max-width: 699px) {
+  .name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+}
+/* スマホ縦（390px）: 1 段に収まるように詰める（それでも収まらない幅ではタブの列が横にスクロールする） */
+@media (max-width: 420px) {
+  .bar-inner {
+    gap: 6px;
+    padding: 0 6px 0 10px;
+  }
+  .mode {
+    padding: 0 7px;
+  }
+  .tab {
+    padding: 0 2px;
+    font-size: 0.86rem;
+  }
+}
+@media (min-width: 700px) {
+  .bar-inner {
+    gap: 16px;
+    padding: 0 16px;
+  }
+  .bar-inner {
+    min-height: 56px;
+  }
+  .tabs {
+    flex: 0 1 auto;
+  }
+  .tab {
+    flex: none;
+    min-height: 56px;
+    padding: 0 16px;
+  }
+}
 .main {
   display: grid;
   gap: 16px;
@@ -237,16 +367,5 @@ function onVpietRun(image: PixelImage, name: string) {
 }
 .lead {
   font-size: 0.88rem;
-}
-/* スマホ縦（390px）: 余白を詰める */
-@media (max-width: 440px) {
-  .bar-inner {
-    gap: 4px 6px;
-    padding: 0 6px 0 4px;
-  }
-  .mode,
-  .tab {
-    padding: 0 12px;
-  }
 }
 </style>
