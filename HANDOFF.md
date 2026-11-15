@@ -26,6 +26,7 @@ URL のパスは `/stegano/`（`web/vite.config.ts` の `base`・`docker/nginx.c
   - 元からの修正（`SearchParams` の `fixPush`・`anyFundAtEnd`、既定 true。false で元と同じ）: 余剰の push で積む数を「出たブロックの大きさ」に（元は入った先の大きさで、実行すると向きがずれて別の出力になることがあった）、終了の候補を余剰のスタックが残るものからも選ぶ、終了の命令では今のブロックのまま周りを黒で囲むことも試す
   - 見つからないときは探索の幅を変えて試し直す（指定の幅 → 300 → 50 → 720。`api.ts`）。作った画像は実行して文字列が出ることを確かめて表示する
   - 速さの目安: 16×16 で数秒〜20 秒、20×20 で 10〜60 秒（幅 100〜300）
+- **リンクのカード（T410）**: Slack・X などでリンクを貼るとカードが出るように、`web/index.html` の head の先頭（charset・viewport のすぐ後）に OGP と Twitter Card を置く（og:site_name `sagisawa`・og:type `website`・og:locale `ja_JP`・og:title・og:description・og:url `https://sagisawa.0am.jp/stegano/`・og:image `https://sagisawa.0am.jp/stegano/og.png`〔1200×630、image/png、alt あり〕・twitter:card `summary_large_image`・twitter:title/description/image、name="description"、canonical。形は `Muratam/sagisawa` の `portal/home/src/og.ts` に揃えた）。画像は `web/public/og.png`（埋め込む画面でサンプルのモンスターに「Hey」を埋め込んだ結果に、sagisawa のダークテーマの帯〔鷺の印・アプリ名・説明・URL〕を重ねたもの）。作り直しは `scripts/og-image.mjs`（先頭のコメントの手順: web/ で build → web/ で `vite preview` → `node scripts/og-image.mjs http://localhost:4173`。Playwright は管理者AI のサーバーの `~/.local/share/sagisawa-admin/screenshot`）。文言を変えたら `web/index.html` と `scripts/og-image.mjs` の CARD を合わせる。`scripts/smoke.sh` が head のメタ（URL は絶対 URL）と画像（200・image/png・1200×630）を確認する
 
 ## 3. テスト
 - `cd web && npm run lint`・`npm test`（vitest、数秒）・`npm run build`（`vue-tsc --noEmit` と `vite build`）

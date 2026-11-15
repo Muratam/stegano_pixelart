@@ -20,4 +20,20 @@ done
 # スラッシュなしは相対の Location で /stegano/ へ
 loc=$(curl -sS -o /dev/null -w '%{redirect_url}' --max-time 10 "$base/stegano")
 case $loc in */stegano/) echo "OK /stegano → /stegano/" ;; *) echo "NG /stegano の転送先: $loc"; fail=1 ;; esac
+# リンクのカード（OGP・Twitter Card）: index.html の head に全部のメタがあり（URL は公開の入口の絶対 URL）、画像が 1200×630 の PNG で取れること
+public=https://sagisawa.0am.jp
+head=$(curl -fsS --max-time 10 "$base/stegano/" | sed '/<\/head>/q')
+for m in '<meta name="description" content=' \
+  'property="og:site_name" content="sagisawa"' 'property="og:type" content="website"' 'property="og:locale" content="ja_JP"' \
+  'property="og:title" content="ドット絵ステガノグラフィー"' 'property="og:description" content=' "property=\"og:url\" content=\"$public/stegano/\"" \
+  "property=\"og:image\" content=\"$public/stegano/og.png\"" 'property="og:image:type" content="image/png"' \
+  'property="og:image:width" content="1200"' 'property="og:image:height" content="630"' 'property="og:image:alt" content=' \
+  'name="twitter:card" content="summary_large_image"' 'name="twitter:title" content=' 'name="twitter:description" content=' \
+  "name=\"twitter:image\" content=\"$public/stegano/og.png\""; do
+  case $head in *"$m"*) ;; *) echo "NG head に $m が無い"; fail=1 ;; esac
+done
+[ $fail = 0 ] && echo "OK /stegano/ の OGP・Twitter Card のメタ"
+ct=$(curl -sS -o /dev/null -w '%{http_code} %{content_type}' --max-time 10 "$base/stegano/og.png")
+size=$(curl -fs --max-time 10 "$base/stegano/og.png" 2>/dev/null | head -c 24 | od -An -tu1 -j16 -N8 | awk '{print $1*16777216+$2*65536+$3*256+$4 "x" $5*16777216+$6*65536+$7*256+$8}')
+if [ "$ct" = "200 image/png" ] && [ "$size" = 1200x630 ]; then echo "OK /stegano/og.png（$ct、$size）"; else echo "NG /stegano/og.png（$ct、$size）"; fail=1; fi
 exit $fail
