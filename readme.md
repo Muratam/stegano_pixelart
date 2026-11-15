@@ -25,6 +25,14 @@ npm run build    # dist/
 
 構成・配信・golden の作り直しは `HANDOFF.md`。
 
+### VPiet（亜種）
+
+上の段の「VPiet」のモード（`#/vpiet/embed`）。ドット絵の見た目をなるべく保ったまま、[Piet](https://www.dangermouse.net/esoteric/piet.html) のプログラムとして実行すると指定した文字列を出力する画像に作り変えます（隠すのではなく「実行すると出る」もの）。
+
+- 「埋め込む」: 小さいドット絵（縦横 48px まで）と文字列から Piet の画像を作ります（探索は Web Worker、進み具合と中止のボタン）。
+- 「取り出す」: 画像を Piet として実行し、出力・スタック・今のコーデルを見られます（1 ステップずつも可）。
+- 出典: [Muratam/vpiet](https://github.com/Muratam/vpiet)（Nim）の探索を `web/src/vpiet/` に移したもの。解説は [chy72.hatenablog.com（2019-09-11）](https://chy72.hatenablog.com/entry/2019/09/11/180418)。サンプルのりんご・土星は vpiet の `test/src/png` のもの。
+
 ## 元のプログラム（Nim）
 
 ```sh

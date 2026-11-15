@@ -90,22 +90,24 @@ function onVpietRun(image: PixelImage, name: string) {
         <AppIcon name="github" />
       </a>
     </div>
-    <div class="bar-inner sub">
-      <nav
-        class="tabs subtabs"
-        aria-label="ページ"
-      >
-        <button
-          v-for="t in tabs"
-          :key="t.id"
-          type="button"
-          class="tab"
-          :aria-current="page === t.id ? 'page' : undefined"
-          @click="go(mode, t.id)"
+    <div class="bar-sub">
+      <div class="bar-inner sub">
+        <nav
+          class="tabs subtabs"
+          aria-label="ページ"
         >
-          {{ t.label }}
-        </button>
-      </nav>
+          <button
+            v-for="t in tabs"
+            :key="t.id"
+            type="button"
+            class="tab"
+            :aria-current="page === t.id ? 'page' : undefined"
+            @click="go(mode, t.id)"
+          >
+            {{ t.label }}
+          </button>
+        </nav>
+      </div>
     </div>
   </header>
 
@@ -153,83 +155,60 @@ function onVpietRun(image: PixelImage, name: string) {
   max-width: 1120px;
   min-height: var(--bar-h);
   margin: 0 auto;
-  padding: 0 16px;
+  /* 左はタブの余白（16px）で本文の左端とそろえる */
+  padding: 0 16px 0 0;
 }
-/* 上の段: モード（ドット絵ステガノ・VPiet）。いまのモードは文字を明るくし、下に線を引く */
-.modes {
-  display: flex;
-  flex: 1;
-  min-width: 0;
-  gap: 4px;
-  align-self: stretch;
-}
-.mode {
-  position: relative;
-  padding: 4px 10px;
-  background: none;
-  border: 0;
-  color: var(--ink-soft);
-  font: inherit;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  cursor: pointer;
-}
-.mode:first-child {
-  padding-left: 0;
-}
-.mode:hover {
-  color: var(--ink);
-}
-.mode[aria-current="page"] {
-  color: var(--ink);
-}
-.mode[aria-current="page"]::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 10px;
-  bottom: -1px;
-  height: 2px;
-  background: var(--accent);
-  border-radius: 2px;
-}
-.mode:not(:first-child)[aria-current="page"]::after {
-  left: 10px;
-}
-/* 下の段: ページ（埋め込む・取り出す・説明） */
-.bar-inner.sub {
-  min-height: 44px;
-  border-top: 1px solid var(--line);
-}
+/*
+ * タブ（Muratam/akochandaaaaaa の .ako-tab と同じ見た目）: 枠の無い文字だけのタブで、選んだタブは文字を明るく太くし、下にアクセントの線を引く。
+ * 上の段がモード（ドット絵ステガノ・VPiet。GitHub へのリンクは右端）、下の段がページ（埋め込む・取り出す・説明）。どちらも左揃え。
+ */
+.modes,
 .tabs {
   display: flex;
   flex: 1;
   min-width: 0;
-  gap: 2px;
+  align-self: stretch;
+  margin-bottom: -1px;
   overflow-x: auto;
   scrollbar-width: none;
 }
+.mode,
 .tab {
-  min-height: 34px;
-  padding: 4px 10px;
+  flex: none;
+  padding: 0 16px;
   background: none;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border: 0;
+  border-bottom: 2px solid transparent;
   color: var(--ink-soft);
   font: inherit;
-  font-size: 0.86rem;
-  font-weight: 600;
+  font-size: 0.9rem;
   white-space: nowrap;
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
+.mode:hover,
 .tab:hover {
   color: var(--ink);
 }
+.mode[aria-current="page"],
 .tab[aria-current="page"] {
-  background: var(--accent-soft);
-  border-color: rgba(71, 200, 230, 0.35);
-  color: var(--accent);
+  color: var(--ink);
+  font-weight: 600;
+  border-bottom-color: var(--accent);
+}
+.bar-sub {
+  border-top: 1px solid var(--line);
+}
+/* 高さは akochan と同じ（スマホ 48px・幅 700px 以上 56px。Muratam/tetris-esolang の T402 と同じ値） */
+.bar-inner,
+.bar-inner.sub {
+  min-height: 48px;
+}
+@media (min-width: 700px) {
+  .bar-inner,
+  .bar-inner.sub {
+    min-height: 56px;
+  }
 }
 .gh {
   display: inline-flex;
@@ -259,18 +238,15 @@ function onVpietRun(image: PixelImage, name: string) {
 .lead {
   font-size: 0.88rem;
 }
-/* スマホ縦（390px）でタブが切れないように詰める */
+/* スマホ縦（390px）: 余白を詰める */
 @media (max-width: 440px) {
   .bar-inner {
     gap: 4px 6px;
-    padding: 0 10px;
+    padding: 0 6px 0 4px;
   }
-  .mode {
-    padding: 4px 8px;
-    font-size: 0.92rem;
-  }
+  .mode,
   .tab {
-    padding: 4px 7px;
+    padding: 0 12px;
   }
 }
 </style>

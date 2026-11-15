@@ -21,11 +21,17 @@ URL のパスは `/stegano/`（`web/vite.config.ts` の `base`・`docker/nginx.c
 - **メッセージの形式**（Web 版）: `[本文のバイト数 16 ビット][UTF-8 の本文][CRC-16/CCITT-FALSE 16 ビット][0 の詰め物]`。詰め物は STC の列の数 w = n div m を `maxColumns(h)`（√2^(h+3)）以下にするため（w が大きいと小行列 Ĥ の列が全部異なる組が作れない）。取り出しは w = 2, 3, … と順に試し、CRC と UTF-8 が合うものを返す
 - **鍵**: 数字だけ（1〜2^53）はそのまま乱数のシード（元のプログラムは 1234 固定）。それ以外は FNV-1a 64 の下位 62 ビット。並べ替えとマスクにだけ使い、暗号化ではない
 - **画面**: sagisawa のポータルと同じトークンのダークテーマ（`web/src/style.css`）。幅 860px 以上で 2 列、それ未満は 1 列。埋め込んだ後の画像は既定で結果をそのまま出す（強調なし）。切り替えは結果・変えた画素（比較用: 元を灰色にして変えた画素だけ新しい色で描き、枠で囲む）・元の画像・変えやすさ。favicon は sagisawa と同じ（`web/public/icon.svg`・`apple-icon.png`）。スマホ縦（390×844）・PC（1280×720）・ポータルの iframe（左に 208px のナビ、上に 36px の帯）の中で横にはみ出さないこと
+- **モードと URL**: 上の段にモード（ドット絵ステガノ・VPiet）、下の段にページ（埋め込む・取り出す・説明）。タブは Muratam/akochandaaaaaa の見た目（枠なし・選んだタブだけ文字を明るく太くして下にアクセントの線、高さ 48px／幅 700px 以上で 56px）で左揃え、GitHub へのリンクは上の段の右端。URL は `#/stegano/embed|extract|about`・`#/vpiet/embed|run|about`（`web/src/App.vue`）
+- **VPiet**（`web/src/vpiet/`）: github.com/Muratam/vpiet（Nim、d3adcbb）の `packages/projects/stegano`（最良優先のビームサーチ）を `search.ts` に、Piet の色と命令を `piet.ts` に移した。Piet の実行は `interpreter.ts`（仕様どおり。20 色以外は白）、文字列 → PASM は `pasm.ts`（Web 版で足した。push は 1〜3 と dup・mul・add・sub で数を作る）。色差は Nim で計算した 20×20 の表（`distance.ts`）。探索は専用の Web Worker（`vpietWorker.ts`、中止は terminate）
+  - 元からの修正（`SearchParams` の `fixPush`・`anyFundAtEnd`、既定 true。false で元と同じ）: 余剰の push で積む数を「出たブロックの大きさ」に（元は入った先の大きさで、実行すると向きがずれて別の出力になることがあった）、終了の候補を余剰のスタックが残るものからも選ぶ、終了の命令では今のブロックのまま周りを黒で囲むことも試す
+  - 見つからないときは探索の幅を変えて試し直す（指定の幅 → 300 → 50 → 720。`api.ts`）。作った画像は実行して文字列が出ることを確かめて表示する
+  - 速さの目安: 16×16 で数秒〜20 秒、20×20 で 10〜60 秒（幅 100〜300）
 
 ## 3. テスト
 - `cd web && npm run lint`・`npm test`（vitest、数秒）・`npm run build`（`vue-tsc --noEmit` と `vite build`）
 - `web/test/golden.test.ts`: 元のプログラム（Nim 1.2.18 でビルド）の記録 `web/test/golden/golden.json`（8 件。サンプルの mon_123.bmp と合成のドット絵 3 枚、h 6〜12、シード 3 種）と照合する。乱数・代表色・候補の色とビット・STC の小行列と結果・ステゴ画像（画素単位）・PSNR・取り出しは完全に一致。コスト（浮動小数）だけは libm（glibc と V8）の cbrt・atan2 などの差で下位のビットが変わるので、相対誤差 1e-12 以内で確認する
 - golden の作り直し: `tools/golden/make.sh <作業用のディレクトリ>`（先頭のコメントに、使った Nim の版・パッケージ・C コンパイラと、src/ のコピーに当てる最小の書き換え）。Nim 2 では乱数の初期化が変わるので 1.2 を使う。C コンパイラは FMA を使わない設定にする（使うと浮動小数の結果が変わる）
+- `web/test/vpiet.test.ts`（約 1 分）: `web/test/vpiet-golden/golden.json` は元の vpiet を Nim 1.2.18 でビルドして作った記録（5 件: りんご・土星・ハート・家に PIET・Hi・OK・Piet・Hello。作り直しは `tools/vpiet-golden/make.sh`、先頭のコメントに手順）。元と同じ扱い（`fixPush: false, anyFundAtEnd: false`）で、Piet の色に寄せた画像・探索の結果（全部の画素）・色差の合計がビット単位で一致すること、直した扱いで実行すると文字列が出て終わること、元でも見つからない組み合わせ（ハートに「あ」）で見つからないと返すことを確認する。直した扱いでも幅 100 ではハートの「Hi」・「OK」などで最後まで行けない（幅を変えた試し直しで見つかる）。元の vpiet は木（24×24）に「PietPiet」で pointer に負の数が来て止まる
 - `web/test/message.test.ts`: 文字列の往復（4 枚 × 鍵と h の組）、違う鍵で取り出せないこと、アルファ・BMP、128×128 の速さ、サンプル `mon_123_stego.png`（鍵 1234 で `Hey`）
 - 配信: `scripts/smoke.sh [ベースの URL]`（health が `{"ok":true}`、`/stegano/` と、それが読む `/stegano/assets/` の JS・CSS が 200、`/stegano` が `/stegano/` へ転送）。ラボでは `scripts/smoke.sh http://10.44.135.10:3170`、公開後は `scripts/smoke.sh https://sagisawa.0am.jp`
 - 画面: 埋め込む → サンプル「モンスター」→ 埋め込む → 取り出しで確認、で `Hey` が戻ること
