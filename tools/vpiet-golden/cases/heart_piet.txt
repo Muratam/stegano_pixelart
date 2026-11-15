@@ -1,0 +1,35 @@
+heart.png
+100 6 30
+push 3
+dup
+mul
+dup
+mul
+push 1
+sub
+dup
+outc
+push 3
+push 2
+add
+dup
+mul
+add
+dup
+outc
+push 2
+dup
+mul
+sub
+dup
+outc
+push 2
+dup
+mul
+dup
+mul
+push 1
+sub
+add
+outc
+end

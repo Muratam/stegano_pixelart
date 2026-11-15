@@ -1,0 +1,23 @@
+apple.png
+100 6 30
+push 3
+dup
+add
+dup
+mul
+dup
+add
+dup
+outc
+push 2
+dup
+mul
+dup
+mul
+dup
+add
+push 1
+add
+add
+outc
+end

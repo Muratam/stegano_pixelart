@@ -1,0 +1,17 @@
+dosei.png
+100 6 30
+push 3
+dup
+mul
+dup
+mul
+push 2
+sub
+dup
+outc
+push 2
+dup
+mul
+sub
+outc
+end
