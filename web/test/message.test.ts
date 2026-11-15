@@ -149,8 +149,8 @@ function writeBmp24(img: PixelImage): Uint8Array {
 }
 
 describe("サンプルの画像", () => {
-  it("public/samples/mon_123_stego.png から鍵 1234 で Hello! が取り出せる", () => {
+  it("public/samples/mon_123_stego.png から鍵 1234 で Hey が取り出せる", () => {
     const img = decodeImage(new Uint8Array(readFileSync(join(__dirname, "../public/samples/mon_123_stego.png"))));
-    expect(extractText(img, "1234", 10)).toMatchObject({ found: true, text: "Hello!" });
+    expect(extractText(img, "1234", 10)).toMatchObject({ found: true, text: "Hey" });
   });
 });

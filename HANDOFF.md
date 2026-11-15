@@ -26,9 +26,9 @@ URL のパスは `/stegano/`（`web/vite.config.ts` の `base`・`docker/nginx.c
 - `cd web && npm run lint`・`npm test`（vitest、数秒）・`npm run build`（`vue-tsc --noEmit` と `vite build`）
 - `web/test/golden.test.ts`: 元のプログラム（Nim 1.2.18 でビルド）の記録 `web/test/golden/golden.json`（8 件。サンプルの mon_123.bmp と合成のドット絵 3 枚、h 6〜12、シード 3 種）と照合する。乱数・代表色・候補の色とビット・STC の小行列と結果・ステゴ画像（画素単位）・PSNR・取り出しは完全に一致。コスト（浮動小数）だけは libm（glibc と V8）の cbrt・atan2 などの差で下位のビットが変わるので、相対誤差 1e-12 以内で確認する
 - golden の作り直し: `tools/golden/make.sh <作業用のディレクトリ>`（先頭のコメントに、使った Nim の版・パッケージ・C コンパイラと、src/ のコピーに当てる最小の書き換え）。Nim 2 では乱数の初期化が変わるので 1.2 を使う。C コンパイラは FMA を使わない設定にする（使うと浮動小数の結果が変わる）
-- `web/test/message.test.ts`: 文字列の往復（4 枚 × 鍵と h の組）、違う鍵で取り出せないこと、アルファ・BMP、128×128 の速さ、サンプル `mon_123_stego.png`（鍵 1234 で `Hello!`）
+- `web/test/message.test.ts`: 文字列の往復（4 枚 × 鍵と h の組）、違う鍵で取り出せないこと、アルファ・BMP、128×128 の速さ、サンプル `mon_123_stego.png`（鍵 1234 で `Hey`）
 - 配信: `scripts/smoke.sh [ベースの URL]`（health が `{"ok":true}`、`/stegano/` と、それが読む `/stegano/assets/` の JS・CSS が 200、`/stegano` が `/stegano/` へ転送）。ラボでは `scripts/smoke.sh http://10.44.135.10:3170`、公開後は `scripts/smoke.sh https://sagisawa.0am.jp`
-- 画面: 埋め込む → サンプル「モンスター」→ 埋め込む → 取り出しで確認、で `Hello!` が戻ること
+- 画面: 埋め込む → サンプル「モンスター」→ 埋め込む → 取り出しで確認、で `Hey` が戻ること
 
 ## 4. デプロイ
 master にマージしてから（PR）、ラボで `scripts/deploy-lab.sh`。`/stegano/api/health` が 200 を返すことを確認する。
