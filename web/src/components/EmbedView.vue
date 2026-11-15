@@ -27,8 +27,8 @@ type View = "stego" | "diff" | "cover" | "cost";
 const view = ref<View>("stego");
 const views: { id: View; label: string }[] = [
   { id: "stego", label: "結果" },
-  { id: "diff", label: "変えた画素" },
   { id: "cover", label: "元の画像" },
+  { id: "diff", label: "変えた画素" },
   { id: "cost", label: "変えやすさ" },
 ];
 const MAX_PALETTE_CHIPS = 64;
@@ -41,7 +41,7 @@ function onLoaded(l: LoadedImage) {
   result.value = null;
   error.value = "";
   wet.value = new Set((l.sample?.wetColors ?? []).filter((c) => l.palette.includes(c)));
-  if (l.sample && !text.value) text.value = "Hello!";
+  if (l.sample && !text.value) text.value = "Hey";
 }
 
 watch([loaded, h], async () => {
