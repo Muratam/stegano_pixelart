@@ -18,12 +18,15 @@ const h = ref(10);
 const busy = ref(false);
 const error = ref("");
 const result = ref<ExtractTextResult | null>(null);
+// 別の画像を読んだらビューアを枠に合わせ直す
+const loadCount = ref(0);
 
 watch(
   () => props.incoming,
   (v) => {
     if (!v) return;
     loaded.value = { image: v.image, name: v.name };
+    loadCount.value++;
     key.value = v.key;
     h.value = v.h;
     void run();
@@ -33,6 +36,7 @@ watch(
 
 function onLoaded(l: LoadedImage) {
   loaded.value = { image: l.image, name: l.name };
+  loadCount.value++;
   result.value = null;
   error.value = "";
   if (l.sample?.key) key.value = l.sample.key;
@@ -71,6 +75,7 @@ async function run() {
         v-if="loaded"
         class="preview"
         :image="loaded.image"
+        :reset-key="loadCount"
         label="取り出す画像"
       />
     </section>
