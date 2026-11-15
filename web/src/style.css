@@ -1,8 +1,8 @@
 /*
- * Tetris Esolang — sagisawa のポータル（Muratam/sagisawa の portal/shared/styles/tokens.css）と同じ夜の計器盤。
- * 暗い基調・細い罫線・アクセントは水面の青 1 色（いまいるタブ・押すボタン）。外部の CDN は使わない（アイコンはインラインの SVG）。
- * トークンの名前と値はポータルと同じ（使うものだけ。--accent-ink は Muratam/akochandaaaaaa と同じ）。色・面・線・文字はここの変数だけを使う。
- * 盤面（canvas）の色も、描くときにここの変数を読む（src/components/TryView.vue）。
+ * ドット絵ステガノ — sagisawa のポータル（Muratam/sagisawa の portal/shared/styles/tokens.css）と同じ夜の計器盤
+ * （Muratam/tetris-esolang の src/style.css と同じやり方）。暗い基調・細い罫線・アクセントは水面の青 1 色。外部の CDN は使わない。
+ * トークンの名前と値はポータルと同じ（使うものだけ）。色・面・線・文字はここの変数だけを使う。
+ * ドット絵そのものは画像の色で描く（src/components/PixelCanvas.vue。枠の色はここの --accent を読む）。
  */
 :root {
   color-scheme: dark;
